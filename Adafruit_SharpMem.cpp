@@ -140,6 +140,12 @@ void Adafruit_SharpMem::sendbyteLSB(uint8_t data)
 /* PUBLIC METHODS */
 /* ************** */
 
+void Adafruit_SharpMem::clearBackBuffer()
+{
+	memset(sharpmem_buffer,0xff,(SHARPMEM_LCDWIDTH * SHARPMEM_LCDHEIGHT) / 8);
+}
+
+
 /**************************************************************************/
 /*! 
     @brief Draws a single pixel in image buffer
@@ -152,8 +158,26 @@ void Adafruit_SharpMem::sendbyteLSB(uint8_t data)
 /**************************************************************************/
 void Adafruit_SharpMem::drawPixel(int16_t x, int16_t y, uint16_t color) 
 {
+    int currentX = x;
+    int currentY = y;
+
+    if (rotation == 0) {
+        // nothing to do
+    } else if (rotation == 1) {
+        x = currentY;
+        y = SHARPMEM_LCDHEIGHT - currentX;
+    }
+    else if (rotation == 2) {
+        x = SHARPMEM_LCDWIDTH - currentX;
+        y = SHARPMEM_LCDHEIGHT - currentY;
+    }
+    else if (rotation == 3) {
+        x = SHARPMEM_LCDWIDTH -currentY;
+        y = currentX;
+    }
+
   if ((x >= SHARPMEM_LCDWIDTH) || (y >= SHARPMEM_LCDHEIGHT))
-    return;
+        return;
 
   if (color)
     sharpmem_buffer[(y*SHARPMEM_LCDWIDTH + x) /8] |= (1 << x % 8);
@@ -175,6 +199,24 @@ void Adafruit_SharpMem::drawPixel(int16_t x, int16_t y, uint16_t color)
 /**************************************************************************/
 uint8_t Adafruit_SharpMem::getPixel(uint16_t x, uint16_t y)
 {
+    int currentX = x;
+    int currentY = y;
+
+    if (rotation == 0) {
+        // nothing to do
+    } else if (rotation == 1) {
+        x = currentY;
+        y = SHARPMEM_LCDHEIGHT - currentX;
+    }
+    else if (rotation == 2) {
+        x = SHARPMEM_LCDWIDTH - currentX;
+        y = SHARPMEM_LCDHEIGHT - currentY;
+    }
+    else if (rotation == 3) {
+        x = SHARPMEM_LCDWIDTH -currentY;
+        y = currentX;
+    }
+
   if ((x >=SHARPMEM_LCDWIDTH) || (y >=SHARPMEM_LCDHEIGHT)) return 0;
   return sharpmem_buffer[(y*SHARPMEM_LCDWIDTH + x) /8] & (1 << x % 8) ? 1 : 0;
 }
